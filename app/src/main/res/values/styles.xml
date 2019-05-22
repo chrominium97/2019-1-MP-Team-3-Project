@@ -1,0 +1,33 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="card" parent="Widget.MaterialComponents.CardView">
+        <item name="android:layout_margin">8dp</item>
+    </style>
+
+    <style name="divider">
+        <item name="android:background">#1F000000</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="AppTheme.Light" parent="Theme.MaterialComponents.Light.Bridge">
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowEnterTransition">@android:transition/move</item>
+        <item name="android:interpolator">@android:interpolator/decelerate_cubic</item>
+
+        <item name="android:windowSharedElementEnterTransition">
+            @android:transition/move
+        </item>
+        
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+</resources>
