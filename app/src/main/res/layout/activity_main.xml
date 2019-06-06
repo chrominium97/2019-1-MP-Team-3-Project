@@ -102,7 +102,7 @@
                         android:id="@+id/select_origin"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="text"
+                        android:inputType="textNoSuggestions"
                         android:focusable="false"
                         android:clickable="true"
                         android:maxLines="1"/>
@@ -118,7 +118,7 @@
                         android:id="@+id/select_dest"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="text"
+                        android:inputType="textNoSuggestions"
                         android:focusable="false"
                         android:clickable="true"
                         android:maxLines="1"/>
@@ -133,6 +133,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        android:onClick="startSearch"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

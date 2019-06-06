@@ -2,41 +2,38 @@ package edu.skku.map.class42.team3;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.util.Pair;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    SearchOptions searchOptions;
+    Models.SearchOptions searchOptions;
+
+    TextInputEditText input_dest;
+    TextInputEditText input_orig;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        searchOptions = new SearchOptions(Calendar.getInstance(), SearchOptions.SearchMode.BY_DEPARTURE);
+        searchOptions = new Models.SearchOptions(Calendar.getInstance(), Models.SearchOptions.SearchMode.BY_DEPARTURE);
 
         final TextView by = findViewById(R.id.tv_search_type);
 
@@ -46,11 +43,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onTabSelected(TabLayout.Tab tab) {
                 switch (tab.getPosition()) {
                     case 0:
-                        searchOptions.setMode(SearchOptions.SearchMode.BY_DEPARTURE);
+                        searchOptions.setMode(Models.SearchOptions.SearchMode.BY_DEPARTURE);
                         by.setText("부터");
                         break;
                     case 1:
-                        searchOptions.setMode(SearchOptions.SearchMode.BY_ARRIVAL);
+                        searchOptions.setMode(Models.SearchOptions.SearchMode.BY_ARRIVAL);
                         by.setText("까지");
                         break;
                 }
@@ -64,9 +61,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onTabReselected(TabLayout.Tab tab) {}
         });
 
-        TextInputEditText input_dest = findViewById(R.id.select_dest);
+        input_dest = findViewById(R.id.select_dest);
         input_dest.setOnClickListener(this);
-        TextInputEditText input_orig = findViewById(R.id.select_origin);
+        input_orig = findViewById(R.id.select_origin);
         input_orig.setOnClickListener(this);
 
         refreshOptions();
@@ -131,10 +128,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        StationSearchActivity.Station station;
-        if (data == null || (station = (StationSearchActivity.Station) data.getSerializableExtra("station")) == null ) {
+        Models.Station station;
+        if (data == null || (station = (Models.Station) data.getSerializableExtra("station")) == null ) {
             return;
         }
+        switch (requestCode) {
+            case 0:
+                input_orig.setText(station.getStationName());
+                searchOptions.setOrigin(station);
+                break;
+            case 1:
+                input_dest.setText(station.getStationName());
+                searchOptions.setDestination(station);
+                break;
+        }
         Log.e(this.getLocalClassName(), station.toString() + requestCode);
+    }
+
+    public void startSearch(View v) {
+        if (searchOptions.checkValidity()) {
+            Intent intent = new Intent(MainActivity.this, StartArrivalActivity.class)
+                    .putExtra("options", searchOptions);
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "Some required files are not filled!", Toast.LENGTH_SHORT).show();
+        }
+
     }
 }

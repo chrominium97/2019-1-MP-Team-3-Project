@@ -33,6 +33,10 @@ public class StartArrivalActivity extends AppCompatActivity {
 
         StrictMode.enableDefaults();
 
+        Models.SearchOptions options = (Models.SearchOptions) getIntent().getSerializableExtra("options");
+
+        getXmlData(options.getOrigin().getStationID(), options.getDestination().getStationID());
+
         //text = (TextView)findViewById(R.id.result);
         //edit = (EditText)findViewById(R.id.edit);
         //edit2 = (EditText)findViewById(R.id.edit2);
@@ -61,7 +65,11 @@ public class StartArrivalActivity extends AppCompatActivity {
         }
     }
 
-    String getXmlData(){
+    String getXmlData() {
+        return getXmlData("NAT010000", "NAT011668");
+    }
+
+    String getXmlData(String dep, String arr){
 
         /*boolean initem = false, inadultcharge = false, inarrplacename = false;
         boolean inarrplandtime =  false, indepplacename = false, indepplandtime = false;
@@ -76,7 +84,7 @@ public class StartArrivalActivity extends AppCompatActivity {
         String realarrive = URLEncoder.encode(finalplace);
         try{
             URL url = new URL("http://openapi.tago.go.kr/openapi/service/TrainInfoService/getStrtpntAlocFndTrainInfo?serviceKey="+
-                    key+"&numOfRows=10&pageNo=1&"+"depPlaceId=" + "NAT010000" + "&arrPlaceId=" + "NAT011668" + "&depPlandTime=20190601&trainGradeCode=00");
+                    key+"&numOfRows=10&pageNo=1&"+"depPlaceId=" + dep + "&arrPlaceId=" + arr + "&depPlandTime=20190601&trainGradeCode=00");
 
             InputStream is = url.openStream();
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
