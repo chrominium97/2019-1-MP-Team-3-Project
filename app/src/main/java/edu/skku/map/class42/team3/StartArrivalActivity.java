@@ -33,40 +33,21 @@ public class StartArrivalActivity extends AppCompatActivity {
 
         StrictMode.enableDefaults();
 
-        Models.SearchOptions options = (Models.SearchOptions) getIntent().getSerializableExtra("options");
+        final Models.SearchOptions options = (Models.SearchOptions) getIntent().getSerializableExtra("options");
 
-        getXmlData(options.getOrigin().getStationID(), options.getDestination().getStationID());
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                data = getXmlData(options.getOrigin().getStationID(), options.getDestination().getStationID());;
 
-        //text = (TextView)findViewById(R.id.result);
-        //edit = (EditText)findViewById(R.id.edit);
-        //edit2 = (EditText)findViewById(R.id.edit2);
-        //String key =  "mCayx%2FW%2FW%2FvhZrAo7PNumFfNOjrs2Lepqx2BwnVCo8xXwmMZfjG9n8Ney5eTvI82bEuzUlAD2GGRKmv1%2BDE%2Fgw%3D%3D";
-
-    }
-
-    public void mOnClick(View v){
-        switch (v.getId()){
-            case R.id.button:
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    data = getXmlData();
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            text.setText(data);
-                        }
-                    });
-                }
-            }).start();
-            break;
-        }
-    }
-
-    String getXmlData() {
-        return getXmlData("NAT010000", "NAT011668");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        text.setText(data);
+                    }
+                });
+            }
+        }).start();
     }
 
     String getXmlData(String dep, String arr){
