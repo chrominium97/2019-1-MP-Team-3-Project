@@ -25,8 +25,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     Models.SearchOptions searchOptions;
 
-    TextInputEditText input_dest;
-    TextInputEditText input_orig;
+    TextInputEditText input_arrival;
+    TextInputEditText input_departure;
+
+    public static final int REQUEST_DEP = 1;
+    public static final int REQUEST_ARR = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,10 +64,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onTabReselected(TabLayout.Tab tab) {}
         });
 
-        input_dest = findViewById(R.id.select_dest);
-        input_dest.setOnClickListener(this);
-        input_orig = findViewById(R.id.select_origin);
-        input_orig.setOnClickListener(this);
+        input_arrival = findViewById(R.id.select_arrival);
+        input_arrival.setOnClickListener(this);
+        input_departure = findViewById(R.id.select_departure);
+        input_departure.setOnClickListener(this);
 
         refreshOptions();
     }
@@ -106,11 +109,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         int reqCode;
         switch (v.getId()) {
-            case R.id.select_origin:
-                reqCode = 0;
+            case R.id.select_departure:
+                reqCode = REQUEST_DEP;
                 break;
-            case R.id.select_dest:
-                reqCode = 1;
+            case R.id.select_arrival:
+                reqCode = REQUEST_ARR;
                 break;
             default:
                 return;
@@ -133,13 +136,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
         switch (requestCode) {
-            case 0:
-                input_orig.setText(station.getStationName());
-                searchOptions.setOrigin(station);
+            case REQUEST_DEP:
+                input_departure.setText(station.getStationName());
+                searchOptions.setDeparture(station);
                 break;
-            case 1:
-                input_dest.setText(station.getStationName());
-                searchOptions.setDestination(station);
+            case REQUEST_ARR:
+                input_arrival.setText(station.getStationName());
+                searchOptions.setArrival(station);
                 break;
         }
         Log.e(this.getLocalClassName(), station.toString() + requestCode);
@@ -151,8 +154,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .putExtra("options", searchOptions);
             startActivity(intent);
         } else {
-            Toast.makeText(this, "Some required files are not filled!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Some required fields are not filled!", Toast.LENGTH_SHORT).show();
         }
-
     }
 }

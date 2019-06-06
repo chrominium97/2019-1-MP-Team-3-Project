@@ -83,7 +83,7 @@ public class Models {
             return this;
         }
 
-        public void setOrigin(Station origin) {
+        public void setDeparture(Station origin) {
             this.origin = origin;
         }
 
@@ -91,7 +91,7 @@ public class Models {
             return origin;
         }
 
-        public void setDestination(Station destination) {
+        public void setArrival(Station destination) {
             this.destination = destination;
         }
 
