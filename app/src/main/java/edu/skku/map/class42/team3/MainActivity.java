@@ -27,7 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-public class MainActivity extends AppCompatActivity implements View.OnFocusChangeListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     SearchOptions searchOptions;
 
@@ -65,9 +65,9 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
         });
 
         TextInputEditText input_dest = findViewById(R.id.select_dest);
-        input_dest.setOnFocusChangeListener(this);
+        input_dest.setOnClickListener(this);
         TextInputEditText input_orig = findViewById(R.id.select_origin);
-        input_orig.setOnFocusChangeListener(this);
+        input_orig.setOnClickListener(this);
 
         refreshOptions();
     }
@@ -106,29 +106,26 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
     }
 
     @Override
-    public void onFocusChange(View v, boolean hasFocus) {
-        if (hasFocus) {
-            int reqCode;
-            switch (v.getId()) {
-                case R.id.select_origin:
-                    reqCode = 0;
-                    break;
-                case R.id.select_dest:
-                    reqCode = 1;
-                    break;
-                default:
-                    return;
-            }
-
-            v.clearFocus();
-            TextInputEditText editText = (TextInputEditText) v;
-            CharSequence hint = editText.getHint();
-            Editable text = editText.getText();
-            Intent intent = new Intent(this, StationSearchActivity.class)
-                    .putExtra("hint", hint.toString())
-                    .putExtra("text", text.toString());
-            startActivityForResult(intent, reqCode);
+    public void onClick(View v) {
+        int reqCode;
+        switch (v.getId()) {
+            case R.id.select_origin:
+                reqCode = 0;
+                break;
+            case R.id.select_dest:
+                reqCode = 1;
+                break;
+            default:
+                return;
         }
+
+        TextInputEditText editText = (TextInputEditText) v;
+        CharSequence hint = editText.getHint();
+        Editable text = editText.getText();
+        Intent intent = new Intent(this, StationSearchActivity.class)
+                .putExtra("hint", hint.toString())
+                .putExtra("text", text.toString());
+        startActivityForResult(intent, reqCode);
     }
 
     @Override

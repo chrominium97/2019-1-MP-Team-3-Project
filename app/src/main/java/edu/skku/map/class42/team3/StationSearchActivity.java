@@ -1,5 +1,6 @@
 package edu.skku.map.class42.team3;
 
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,7 +40,6 @@ public class StationSearchActivity extends AppCompatActivity {
         stationList.setLayoutManager(manager);
 
         layout.setError("aaaa");
-
     }
 
     @Override
@@ -66,5 +66,12 @@ public class StationSearchActivity extends AppCompatActivity {
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+}
+
+class StationListFetcher {
+
+    StationListFetcher(ContextWrapper wrapper) {
+
     }
 }
