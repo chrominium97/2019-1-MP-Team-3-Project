@@ -1,5 +1,7 @@
 package edu.skku.map.class42.team3;
 
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.Calendar;
 
@@ -105,6 +107,39 @@ public class Models {
 
         boolean checkValidity() {
             return mode != null && origin != null && destination != null;
+        }
+    }
+
+    static class TrainSchedule {
+        private final String departureTIme;
+        private final String arrivalTime;
+
+        private final int trainType;
+
+        TrainSchedule(String dep, String arr, int trainType) {
+            this.departureTIme = dep;
+            this.arrivalTime = arr;
+            this.trainType = trainType;
+        }
+
+        public int getTrainType() {
+            return trainType;
+        }
+
+        public String getArrivalTime() {
+            return arrivalTime;
+        }
+
+        public String getDepartureTIme() {
+            return departureTIme;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return new StringBuilder(departureTIme)
+                    .append("~")
+                    .append(arrivalTime).toString();
         }
     }
 }
