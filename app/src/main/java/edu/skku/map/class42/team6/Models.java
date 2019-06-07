@@ -1,4 +1,4 @@
-package edu.skku.map.class42.team3;
+package edu.skku.map.class42.team6;
 
 import androidx.annotation.NonNull;
 
@@ -6,6 +6,10 @@ import java.io.Serializable;
 import java.util.Calendar;
 
 public class Models {
+
+//    public static final String API_KEY = "mCayx%2FW%2FW%2FvhZrAo7PNumFfNOjrs2Lepqx2BwnVCo8xXwmMZfjG9n8Ney5eTvI82bEuzUlAD2GGRKmv1%2BDE%2Fgw%3D%3D";
+    public static final String API_KEY = "F8csb9A9pHefkBCGavCVP%2BF%2BeiMb1i3vLsGV9hi1sWCcmOtNmtD5oXWN%2BGbSPxp%2B2ZORejIa9PY%2FaIlPM%2FH1vA%3D%3D";
+
     static class City implements Serializable {
         private final String cityName;
         private final int cityCode;
@@ -50,19 +54,14 @@ public class Models {
 
     static class SearchOptions implements Serializable {
 
-        enum SearchMode {
-            BY_DEPARTURE, BY_ARRIVAL
-        }
-
-        SearchOptions(Calendar dateTime, SearchMode mode) {
-            this.dateTime = dateTime;
-            this.mode = mode;
-        }
-
         private Calendar dateTime;
         private SearchMode mode;
         private Station origin;
         private Station destination;
+        SearchOptions(Calendar dateTime, SearchMode mode) {
+            this.dateTime = dateTime;
+            this.mode = mode;
+        }
 
         SearchOptions setMode(SearchMode mode) {
             this.mode = mode;
@@ -107,6 +106,28 @@ public class Models {
 
         boolean checkValidity() {
             return mode != null && origin != null && destination != null;
+        }
+
+        enum SearchMode {
+            BY_DEPARTURE, BY_ARRIVAL
+        }
+    }
+
+    static class Vehicle {
+        private final int vehicleID;
+        private final String vehicleName;
+
+        Vehicle(int vid, String vname) {
+            this.vehicleID = vid;
+            this.vehicleName = vname;
+        }
+
+        public int getVehicleID() {
+            return vehicleID;
+        }
+
+        public String getVehicleName() {
+            return vehicleName;
         }
     }
 

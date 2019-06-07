@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="edu.skku.map.class42.team3">
+    package="edu.skku.map.class42.team6">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -12,11 +12,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".StartArrivalActivity"></activity>
+        <activity android:name="edu.skku.map.class42.team6.StartArrivalActivity"></activity>
         <activity
-            android:name=".StationSearchActivity"
+            android:name="edu.skku.map.class42.team6.StationSearchActivity"
             android:theme="@style/AppTheme.Light"></activity>
-        <activity android:name=".MainActivity">
+        <activity android:name="edu.skku.map.class42.team6.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

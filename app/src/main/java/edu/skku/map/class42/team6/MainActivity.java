@@ -1,12 +1,10 @@
-package edu.skku.map.class42.team3;
-
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+package edu.skku.map.class42.team6;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Looper;
 import android.text.Editable;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +12,10 @@ import android.widget.DatePicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
@@ -23,13 +25,11 @@ import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    Models.SearchOptions searchOptions;
-
-    TextInputEditText input_arrival;
-    TextInputEditText input_departure;
-
     public static final int REQUEST_DEP = 1;
     public static final int REQUEST_ARR = 2;
+    Models.SearchOptions searchOptions;
+    TextInputEditText input_arrival;
+    TextInputEditText input_departure;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,10 +58,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
 
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
         });
 
         input_arrival = findViewById(R.id.select_arrival);
@@ -70,6 +72,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         input_departure.setOnClickListener(this);
 
         refreshOptions();
+
+        StationFetcher.getInstance().request(new StationFetcher.OnStationListFetchedListener() {
+            @Override
+            public void onStationFetched(StationListResult result) {
+                Log.i(MainActivity.this.getClass().getName(), "Station pre-fetched.");
+            }
+
+            @NonNull
+            @Override
+            public Looper getMainLooper() {
+                return MainActivity.this.getMainLooper();
+            }
+        });
+        VehicleFetcher.getInstance().request(new VehicleFetcher.OnVehicleListFetchedListener() {
+            @Override
+            public void onVehicleFetched(VehicleListResult result) {
+                Log.i(MainActivity.this.getClass().getName(), "Vehicles pre-fetched.");
+            }
+
+            @NonNull
+            @Override
+            public Looper getMainLooper() {
+                return MainActivity.this.getMainLooper();
+            }
+        });
     }
 
     public void selectDate(View v) {
@@ -102,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         date.setText(SimpleDateFormat.getDateInstance().format(searchOptions.getDateTime().getTime()));
         time.setText((new SimpleDateFormat("HH:mm")).format(searchOptions.getDateTime().getTime()));
-        mode.setText(tabs.getSelectedTabPosition() == 0? getString(R.string.from) : getString(R.string.until));
+        mode.setText(tabs.getSelectedTabPosition() == 0 ? getString(R.string.from) : getString(R.string.until));
     }
 
     @Override
@@ -132,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Models.Station station;
-        if (data == null || (station = (Models.Station) data.getSerializableExtra("station")) == null ) {
+        if (data == null || (station = (Models.Station) data.getSerializableExtra("station")) == null) {
             return;
         }
         switch (requestCode) {

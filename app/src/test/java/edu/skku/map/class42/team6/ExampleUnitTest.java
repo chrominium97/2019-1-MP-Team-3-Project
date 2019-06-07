@@ -1,4 +1,4 @@
-package edu.skku.map.class42.team3;
+package edu.skku.map.class42.team6;
 
 import org.junit.Test;
 
