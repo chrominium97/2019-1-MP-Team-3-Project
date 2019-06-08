@@ -78,6 +78,7 @@ class VehicleFetcher {
             conn.setRequestMethod("GET");
 
             if (conn.getResponseCode() < 200 || conn.getResponseCode() > 300) {
+                conn.disconnect();
                 return vehicleHashMap;
             }
 

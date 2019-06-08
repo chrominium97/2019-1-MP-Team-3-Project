@@ -134,16 +134,15 @@ public class Models {
     static class TrainSchedule {
         private final String departureTIme;
         private final String arrivalTime;
+        private final String trainType;
 
-        private final int trainType;
-
-        TrainSchedule(String dep, String arr, int trainType) {
+        TrainSchedule(String dep, String arr, String trainType) {
             this.departureTIme = dep;
             this.arrivalTime = arr;
             this.trainType = trainType;
         }
 
-        public int getTrainType() {
+        public String getTrainType() {
             return trainType;
         }
 
@@ -151,7 +150,7 @@ public class Models {
             return arrivalTime;
         }
 
-        public String getDepartureTIme() {
+        public String getDepartureTime() {
             return departureTIme;
         }
 

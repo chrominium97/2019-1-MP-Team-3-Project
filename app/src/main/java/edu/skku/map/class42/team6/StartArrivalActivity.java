@@ -2,11 +2,16 @@ package edu.skku.map.class42.team6;
 
 import android.os.Bundle;
 import android.os.Looper;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -19,13 +24,12 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class StartArrivalActivity extends AppCompatActivity {
 
-    ListView mListView;
     ArrayList<Models.TrainSchedule> all = new ArrayList<>();
     XmlPullParser xpp;
 
@@ -33,24 +37,24 @@ public class StartArrivalActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_arrival);
-        mListView = findViewById(R.id.listview);
 
         final Models.SearchOptions options = (Models.SearchOptions) getIntent().getSerializableExtra("options");
-        final ArrayAdapter<Models.TrainSchedule> adapter
-                = new ArrayAdapter<Models.TrainSchedule>(this, android.R.layout.simple_list_item_1, android.R.id.text1, all);
-        mListView.setAdapter(adapter);
+//        final ArrayAdapter<Models.TrainSchedule> adapter
+//                = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1, all);
+//        mListView.setAdapter(adapter);
+
+        final RecyclerView list = findViewById(R.id.listview);
+        list.setLayoutManager(new LinearLayoutManager(this));
 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final List<Models.TrainSchedule> data = getXmlData(options.getOrigin().getStationID(), options.getDestination().getStationID());
+                final List<Models.TrainSchedule> data = getXmlData(options);
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        all.clear();
-                        all.addAll(data);
-                        adapter.notifyDataSetChanged();
+                        list.setAdapter(new SearchListAdapter(data));
                     }
                 });
             }
@@ -75,13 +79,22 @@ public class StartArrivalActivity extends AppCompatActivity {
         });
     }
 
-    List<Models.TrainSchedule> getXmlData(String dep, String arr) {
+    List<Models.TrainSchedule> getXmlData(Models.SearchOptions options) {
 
         ArrayList<Models.TrainSchedule> out = new ArrayList<>();
         try {
-            HttpURLConnection conn
-                    = (HttpURLConnection) new URL("http://openapi.tago.go.kr/openapi/service/TrainInfoService/getStrtpntAlocFndTrainInfo?serviceKey=" +
-                    Models.API_KEY + "&numOfRows=10&pageNo=1&" + "depPlaceId=" + dep + "&arrPlaceId=" + arr + "&depPlandTime=20190601").openConnection();
+//            HttpURLConnection conn = (HttpURLConnection) new URL(
+//                    new StringBuilder("http://openapi.tago.go.kr/openapi/service/TrainInfoService/getStrtpntAlocFndTrainInfo")
+//                            .append("?serviceKey=") + Models.API_KEY + "&numOfRows=10&pageNo=1&" + "depPlaceId=" + dep + "&arrPlaceId=" + arr + "&depPlandTime=20190601").openConnection();
+            HttpURLConnection conn = (HttpURLConnection) new URL(
+                    new StringBuilder("http://openapi.tago.go.kr/openapi/service/TrainInfoService/getStrtpntAlocFndTrainInfo")
+                            .append("?serviceKey=").append(Models.API_KEY)
+                            .append("&numOfRows=100&pageNo=1")
+                            .append("&depPlaceId=").append(options.getOrigin().getStationID())
+                            .append("&arrPlaceId=").append(options.getDestination().getStationID())
+                            .append("&depPlandTime=").append(new SimpleDateFormat("yyyyMMdd").format(options.getDateTime().getTime()))
+                            .toString()
+            ).openConnection();
             conn.setRequestMethod("GET");
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -101,22 +114,20 @@ public class StartArrivalActivity extends AppCompatActivity {
 
             int eventType = xpp.getEventType();
 
-            String depTIme = null, arrTIme = null;
-            int trainGrade = 0;
+            String depTIme = null, arrTIme = null, trainType = null;
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 switch (eventType) {
                     case XmlPullParser.START_TAG:
                         tag = xpp.getName();
                         switch (tag) {
                             case "arrplandtime":
-                                xpp.next();
-                                arrTIme = xpp.getText();
+                                arrTIme = xpp.nextText();
                                 break;
                             case "depplandtime":
-                                xpp.next();
-                                depTIme = xpp.getText();
+                                depTIme = xpp.nextText();
                                 break;
                             case "traingradename":
+                                trainType = xpp.nextText();
                                 break;
                         }
                         break;
@@ -124,7 +135,7 @@ public class StartArrivalActivity extends AppCompatActivity {
                         tag = xpp.getName();
 
                         if (tag.equals("item")) {
-                            out.add(new Models.TrainSchedule(depTIme, arrTIme, 0));
+                            out.add(new Models.TrainSchedule(depTIme, arrTIme, trainType));
                         }
                         break;
                 }
@@ -138,5 +149,50 @@ public class StartArrivalActivity extends AppCompatActivity {
         }
         //buffer.append("파싱 끝!");
         return out;
+    }
+
+    class SearchListAdapter extends RecyclerView.Adapter<SearchListViewHolder> {
+
+        List<Models.TrainSchedule> schedules;
+
+        SearchListAdapter(List<Models.TrainSchedule> s) {
+            this.schedules = s;
+        }
+
+        @NonNull
+        @Override
+        public SearchListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View inflate = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_layout, parent, false);
+            return new SearchListViewHolder(inflate);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull SearchListViewHolder holder, int position) {
+            Models.TrainSchedule schedule = schedules.get(position);
+            holder.trainType.setText(schedule.getTrainType());
+            holder.trainTime.setText(schedule.getDepartureTime().substring(8, 12) + " ~ " + schedule.getArrivalTime().substring(8, 12));
+        }
+
+        @Override
+        public int getItemCount() {
+            return schedules.size();
+        }
+    }
+
+    class SearchListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public TextView trainType;
+        public TextView trainTime;
+
+        public SearchListViewHolder(View v) {
+            super(v);
+            trainType = v.findViewById(R.id.trainType);
+            trainTime = v.findViewById(R.id.trainTime);
+            v.findViewById(R.id.addButton).setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            Toast.makeText(StartArrivalActivity.this, String.valueOf(getAdapterPosition()), Toast.LENGTH_SHORT).show();
+        }
     }
 }

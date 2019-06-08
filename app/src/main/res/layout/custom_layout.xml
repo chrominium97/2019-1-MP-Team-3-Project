@@ -17,14 +17,14 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textView1"
+            android:id="@+id/trainType"
             style="@style/TextAppearance.MaterialComponents.Overline"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:text="KTX" />
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/trainTime"
             style="@style/TextAppearance.MaterialComponents.Subtitle1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/addButton"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

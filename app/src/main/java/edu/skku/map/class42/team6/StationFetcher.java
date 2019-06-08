@@ -98,6 +98,7 @@ class StationFetcher {
             conn.setRequestMethod("GET");
 
             if (conn.getResponseCode() < 200 || conn.getResponseCode() > 300) {
+                conn.disconnect();
                 return cityHashMap;
             }
 
@@ -159,6 +160,7 @@ class StationFetcher {
             conn.setRequestMethod("GET");
 
             if (conn.getResponseCode() < 200 || conn.getResponseCode() > 300) {
+                conn.disconnect();
                 return stationHashMap;
             }
 
@@ -200,7 +202,6 @@ class StationFetcher {
                 }
                 parserEvent = parser.next();
             }
-
             conn.disconnect();
         } catch (Exception e) {
             e.printStackTrace();

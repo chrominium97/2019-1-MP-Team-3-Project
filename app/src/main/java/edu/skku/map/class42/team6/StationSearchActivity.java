@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -47,16 +48,16 @@ public class StationSearchActivity extends AppCompatActivity {
         // Init list
         stationList = findViewById(R.id.list);
         RecyclerView.LayoutManager manager = new GridLayoutManager(this, 2);
-        RecyclerView.Adapter adapter = new RecyclerView.Adapter<SearchListViewHolder>() {
+        RecyclerView.Adapter adapter = new RecyclerView.Adapter<StationListViewHolder>() {
             @NonNull
             @Override
-            public SearchListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            public StationListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 View inflate = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_1, parent, false);
-                return new SearchListViewHolder(inflate);
+                return new StationListViewHolder(inflate);
             }
 
             @Override
-            public void onBindViewHolder(@NonNull SearchListViewHolder holder, int position) {
+            public void onBindViewHolder(@NonNull StationListViewHolder holder, int position) {
                 holder.textView.setText(results.get(position).getStationName());
             }
 
@@ -85,6 +86,7 @@ public class StationSearchActivity extends AppCompatActivity {
                 results.setFilter(editText.getText().toString());
             }
         });
+        editText.requestFocus();
 
         fetchStations();
     }
@@ -145,16 +147,18 @@ public class StationSearchActivity extends AppCompatActivity {
         }
 
         public void putNewResult(Map<String, Models.Station> stations) {
+            Log.d(StationSearchActivity.this.getClass().getName(), "New set of data set");
             this.originalMap = stations;
             this.originalIndex = new ArrayList<>(this.originalMap.keySet());
 
             Collections.sort(this.originalIndex, new Comparator<String>() {
                 @Override
                 public int compare(String o1, String o2) {
-                    return get(o1).getStationName().compareTo(get(o2).getStationName());
+                    int i = get(o1).getStationName().compareTo(get(o2).getStationName());
+                    return i;
                 }
             });
-            this.stationIndex = this.originalIndex;
+            this.stationIndex = new ArrayList<>(this.originalIndex);
 
             applyFilter();
         }
@@ -165,9 +169,24 @@ public class StationSearchActivity extends AppCompatActivity {
 
         private void applyFilter() {
             stationIndex.clear();
-            for (Map.Entry<String, Models.Station> entry : originalMap.entrySet()) {
-                if (entry.getValue().getStationName().contains(filter))
-                    stationIndex.add(entry.getKey());
+            for (String index : originalIndex) {
+                if (get(index).getStationName().contains(filter)) {
+                    stationIndex.add(index);
+                }
+            }
+            if (!"".equals(filter)) {
+                Collections.sort(stationIndex, new Comparator<String>() {
+                    @Override
+                    public int compare(String o1, String o2) {
+                        String s1 = get(o1).getStationName(), s2 = get(o2).getStationName();
+                        boolean b1 = s1.startsWith(filter);
+                        boolean b2 = s2.startsWith(filter);
+                        if (b1 ^ b2) {
+                            return b1 ? -1 : 1;
+                        }
+                        return s1.compareTo(s2);
+                    }
+                });
             }
             if (adapter != null) {
                 adapter.notifyDataSetChanged();
@@ -192,10 +211,10 @@ public class StationSearchActivity extends AppCompatActivity {
         }
     }
 
-    class SearchListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class StationListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView textView;
 
-        public SearchListViewHolder(View v) {
+        public StationListViewHolder(View v) {
             super(v);
             v.setClickable(true);
             v.setOnClickListener(this);
