@@ -61,7 +61,7 @@ class VehicleFetcher {
     private void fetch() {
         Map<Integer, Models.Vehicle> vehicleMap = fetchVehicle();
         int r1 = 0;
-        while (r1 < 5 && (vehicleMap= fetchVehicle()) == null) {
+        while (r1 < 5 && (vehicleMap = fetchVehicle()) == null) {
             r1++;
         }
         result = new OnVehicleListFetchedListener.VehicleListResult(vehicleMap != null, vehicleMap);

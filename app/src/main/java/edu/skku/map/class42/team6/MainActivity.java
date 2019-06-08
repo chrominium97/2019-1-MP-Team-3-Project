@@ -2,6 +2,7 @@ package edu.skku.map.class42.team6;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
@@ -22,6 +23,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -97,6 +99,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return MainActivity.this.getMainLooper();
             }
         });
+
+        CalendarManager manager = new CalendarManager(new CalendarManager.ScheduleChangeListener() {
+            @Override
+            public void onScheduleChanged(Map<String, Map<String, String>> newSchedule) {
+
+            }
+
+            @NonNull
+            @Override
+            public Context getContext() {
+                return MainActivity.this;
+            }
+        });
+        manager.deleteCalendar();
+        manager.initCalendar();
+        manager.refreshSchedules();
     }
 
     public void selectDate(View v) {

@@ -51,7 +51,7 @@ class StationFetcher {
     }
 
     public static StationFetcher getInstance() {
-        return instance == null? (instance = new StationFetcher()) : instance;
+        return instance == null ? (instance = new StationFetcher()) : instance;
     }
 
     public void request(OnStationListFetchedListener listFetchedListener) {
@@ -69,7 +69,7 @@ class StationFetcher {
         success = cityMap != null;
         if (success) {
             Log.d(StationFetcher.this.getClass().getName(), "City list fetch succeeded");
-            for (Models.City city: cityMap.values()) {
+            for (Models.City city : cityMap.values()) {
                 r2 = 0;
                 Map<String, Models.Station> map = null;
                 while (r2 < 5 && (map = fetchStationsByCity(city.getCityCode())) == null) {

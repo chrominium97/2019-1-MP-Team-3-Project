@@ -1,8 +1,5 @@
 package edu.skku.map.class42.team6;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +9,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -44,11 +44,11 @@ public class FirstActivity extends AppCompatActivity implements View.OnClickList
             startActivity(new Intent(getApplicationContext(), MainActivity.class)); //추가해 줄 ProfileActivity
         }*/
         //initializing views
-        editTextEmail = (EditText) findViewById(R.id.editTextEmail);
-        editTextPassword = (EditText) findViewById(R.id.editTextPassword);
-        textviewSingin= (TextView) findViewById(R.id.textViewSignin);
-        textviewMessage = (TextView) findViewById(R.id.textviewMessage);
-        buttonSignup = (Button) findViewById(R.id.buttonSignup);
+        editTextEmail = findViewById(R.id.editTextEmail);
+        editTextPassword = findViewById(R.id.editTextPassword);
+        textviewSingin = findViewById(R.id.textViewSignin);
+        textviewMessage = findViewById(R.id.textviewMessage);
+        buttonSignup = findViewById(R.id.buttonSignup);
         progressDialog = new ProgressDialog(this);
 
         //button click event
@@ -59,16 +59,16 @@ public class FirstActivity extends AppCompatActivity implements View.OnClickList
 
 
     //Firebse creating a new user
-    private void registerUser(){
+    private void registerUser() {
         //사용자가 입력하는 email, password를 가져온다.
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
         //email과 password가 비었는지 아닌지를 체크 한다.
-        if(TextUtils.isEmpty(email)){
+        if (TextUtils.isEmpty(email)) {
             Toast.makeText(this, "Email을 입력해 주세요.", Toast.LENGTH_SHORT).show();
             return;
         }
-        if(TextUtils.isEmpty(password)){
+        if (TextUtils.isEmpty(password)) {
             Toast.makeText(this, "Password를 입력해 주세요.", Toast.LENGTH_SHORT).show();
         }
 
@@ -81,7 +81,7 @@ public class FirstActivity extends AppCompatActivity implements View.OnClickList
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
+                        if (task.isSuccessful()) {
                             finish();
                             startActivity(new Intent(getApplicationContext(), MainActivity.class));
                         } else {
@@ -98,12 +98,12 @@ public class FirstActivity extends AppCompatActivity implements View.OnClickList
     //button click event
     @Override
     public void onClick(View view) {
-        if(view == buttonSignup) {
+        if (view == buttonSignup) {
             //TODO
             registerUser();
         }
 
-        if(view == textviewSingin) {
+        if (view == textviewSingin) {
             //TODO
             startActivity(new Intent(this, LoginActivity.class)); //추가해 줄 로그인 액티비티
         }

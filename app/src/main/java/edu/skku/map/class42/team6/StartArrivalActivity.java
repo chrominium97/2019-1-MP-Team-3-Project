@@ -1,22 +1,21 @@
 package edu.skku.map.class42.team6;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -30,49 +29,46 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class StartArrivalActivity extends AppCompatActivity {
 
-    ArrayList<Models.TrainSchedule> all = new ArrayList<>();
-    XmlPullParser xpp;
+    CalendarManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+//        manager = new CalendarManager(this);
+
         setContentView(R.layout.activity_start_arrival);
 
         final Models.SearchOptions options = (Models.SearchOptions) getIntent().getSerializableExtra("options");
-//        final ArrayAdapter<Models.TrainSchedule> adapter
-//                = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1, all);
-//        mListView.setAdapter(adapter);
 
         final RecyclerView list = findViewById(R.id.listview);
         list.setLayoutManager(new LinearLayoutManager(this));
 
-        ((ChipGroup) findViewById(R.id.chip_group)).setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(ChipGroup chipGroup, int i) {
-
-            }
-        });
-
-        ChipGroup filterChipGroup = findViewById(R.id.chip_group);
-        filterChipGroup.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(ChipGroup group, @IdRes int checkedId) {
-                //
-            }
-        });
-
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final List<Models.TrainSchedule> data = getXmlData(options);
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        final List<Models.TrainSchedule> data = getXmlData(options);
                         list.setAdapter(new SearchListAdapter(data));
+                        new CalendarManager(new CalendarManager.ScheduleChangeListener() {
+                            @Override
+                            public void onScheduleChanged(Map<String, Map<String, String>> newSchedule) {
+
+                            }
+
+                            @NonNull
+                            @Override
+                            public Context getContext() {
+                                return StartArrivalActivity.this;
+                            }
+                        });
                     }
                 });
             }
@@ -85,6 +81,17 @@ public class StartArrivalActivity extends AppCompatActivity {
                 for (Models.Vehicle vehicle : result.vehicles.values()) {
                     Chip chip = (Chip) getLayoutInflater().inflate(R.layout.chip, group, false);
                     chip.setText(vehicle.getVehicleName());
+                    chip.setChecked(true);
+                    chip.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                            if (isChecked) {
+                                ((SearchListAdapter) list.getAdapter()).addFilter(buttonView.getText().toString());
+                            } else {
+                                ((SearchListAdapter) list.getAdapter()).removeFilter(buttonView.getText().toString());
+                            }
+                        }
+                    });
                     group.addView(chip);
                 }
             }
@@ -101,9 +108,6 @@ public class StartArrivalActivity extends AppCompatActivity {
 
         ArrayList<Models.TrainSchedule> out = new ArrayList<>();
         try {
-//            HttpURLConnection conn = (HttpURLConnection) new URL(
-//                    new StringBuilder("http://openapi.tago.go.kr/openapi/service/TrainInfoService/getStrtpntAlocFndTrainInfo")
-//                            .append("?serviceKey=") + Models.API_KEY + "&numOfRows=10&pageNo=1&" + "depPlaceId=" + dep + "&arrPlaceId=" + arr + "&depPlandTime=20190601").openConnection();
             HttpURLConnection conn = (HttpURLConnection) new URL(
                     new StringBuilder("http://openapi.tago.go.kr/openapi/service/TrainInfoService/getStrtpntAlocFndTrainInfo")
                             .append("?serviceKey=").append(Models.API_KEY)
@@ -128,7 +132,6 @@ public class StartArrivalActivity extends AppCompatActivity {
             String tag;
 
             xpp.next();
-            //parser.setInput(url.openStream(), null);
 
             int eventType = xpp.getEventType();
 
@@ -153,7 +156,13 @@ public class StartArrivalActivity extends AppCompatActivity {
                         tag = xpp.getName();
 
                         if (tag.equals("item")) {
-                            out.add(new Models.TrainSchedule(depTIme, arrTIme, trainType));
+                            out.add(new Models.TrainSchedule(
+                                    depTIme,
+                                    arrTIme,
+                                    trainType,
+                                    options.getOrigin().getStationName(),
+                                    options.getDestination().getStationName())
+                            );
                         }
                         break;
                 }
@@ -193,6 +202,7 @@ public class StartArrivalActivity extends AppCompatActivity {
             Models.TrainSchedule schedule = schedules.get(position);
             holder.trainType.setText(schedule.getTrainType());
             holder.trainTime.setText(schedule.getDepartureTime().substring(8, 12) + " ~ " + schedule.getArrivalTime().substring(8, 12));
+            holder.schedule = schedules.get(position);
         }
 
         @Override
@@ -215,7 +225,7 @@ public class StartArrivalActivity extends AppCompatActivity {
             filters.addAll(newFilters);
 
             schedules.clear();
-            for(Models.TrainSchedule schedule: originalSchedules) {
+            for (Models.TrainSchedule schedule : originalSchedules) {
                 if (filters.contains(schedule.getTrainType())) {
                     schedules.add(schedule);
                 }
@@ -227,17 +237,26 @@ public class StartArrivalActivity extends AppCompatActivity {
     class SearchListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView trainType;
         public TextView trainTime;
+        public Button button;
+
+        public Models.TrainSchedule schedule;
 
         public SearchListViewHolder(View v) {
             super(v);
             trainType = v.findViewById(R.id.trainType);
             trainTime = v.findViewById(R.id.trainTime);
-            v.findViewById(R.id.addButton).setOnClickListener(this);
+            button = v.findViewById(R.id.addButton);
+
+            button.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
-            Toast.makeText(StartArrivalActivity.this, String.valueOf(getAdapterPosition()), Toast.LENGTH_SHORT).show();
+            if (v.isEnabled()) {
+                manager.addSchedule(schedule);
+            } else {
+                manager.removeSchedule(schedule);
+            }
         }
     }
 }

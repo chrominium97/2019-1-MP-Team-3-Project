@@ -7,8 +7,8 @@ import java.util.Calendar;
 
 public class Models {
 
-//    public static final String API_KEY = "mCayx%2FW%2FW%2FvhZrAo7PNumFfNOjrs2Lepqx2BwnVCo8xXwmMZfjG9n8Ney5eTvI82bEuzUlAD2GGRKmv1%2BDE%2Fgw%3D%3D";
-    public static final String API_KEY = "F8csb9A9pHefkBCGavCVP%2BF%2BeiMb1i3vLsGV9hi1sWCcmOtNmtD5oXWN%2BGbSPxp%2B2ZORejIa9PY%2FaIlPM%2FH1vA%3D%3D";
+    public static final String API_KEY = "mCayx%2FW%2FW%2FvhZrAo7PNumFfNOjrs2Lepqx2BwnVCo8xXwmMZfjG9n8Ney5eTvI82bEuzUlAD2GGRKmv1%2BDE%2Fgw%3D%3D";
+//    public static final String API_KEY = "F8csb9A9pHefkBCGavCVP%2BF%2BeiMb1i3vLsGV9hi1sWCcmOtNmtD5oXWN%2BGbSPxp%2B2ZORejIa9PY%2FaIlPM%2FH1vA%3D%3D";
 
     static class City implements Serializable {
         private final String cityName;
@@ -58,6 +58,7 @@ public class Models {
         private SearchMode mode;
         private Station origin;
         private Station destination;
+
         SearchOptions(Calendar dateTime, SearchMode mode) {
             this.dateTime = dateTime;
             this.mode = mode;
@@ -132,14 +133,18 @@ public class Models {
     }
 
     static class TrainSchedule {
-        private final String departureTIme;
+        private final String departureTime;
         private final String arrivalTime;
         private final String trainType;
+        private final String departingStation;
+        private final String arrivingStation;
 
-        TrainSchedule(String dep, String arr, String trainType) {
-            this.departureTIme = dep;
+        TrainSchedule(String dep, String arr, String trainType, String depSt, String arrSt) {
+            this.departureTime = dep;
             this.arrivalTime = arr;
             this.trainType = trainType;
+            this.departingStation = depSt;
+            this.arrivingStation = arrSt;
         }
 
         public String getTrainType() {
@@ -151,13 +156,21 @@ public class Models {
         }
 
         public String getDepartureTime() {
-            return departureTIme;
+            return departureTime;
+        }
+
+        public String getArrivingStation() {
+            return arrivingStation;
+        }
+
+        public String getDepartingStation() {
+            return departingStation;
         }
 
         @NonNull
         @Override
         public String toString() {
-            return new StringBuilder(departureTIme)
+            return new StringBuilder(departureTime)
                     .append("~")
                     .append(arrivalTime).toString();
         }
