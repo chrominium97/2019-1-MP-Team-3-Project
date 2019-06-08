@@ -5,15 +5,18 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -45,6 +48,21 @@ public class StartArrivalActivity extends AppCompatActivity {
 
         final RecyclerView list = findViewById(R.id.listview);
         list.setLayoutManager(new LinearLayoutManager(this));
+
+        ((ChipGroup) findViewById(R.id.chip_group)).setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(ChipGroup chipGroup, int i) {
+
+            }
+        });
+
+        ChipGroup filterChipGroup = findViewById(R.id.chip_group);
+        filterChipGroup.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(ChipGroup group, @IdRes int checkedId) {
+                //
+            }
+        });
 
         new Thread(new Runnable() {
             @Override
@@ -153,10 +171,14 @@ public class StartArrivalActivity extends AppCompatActivity {
 
     class SearchListAdapter extends RecyclerView.Adapter<SearchListViewHolder> {
 
-        List<Models.TrainSchedule> schedules;
+        final List<Models.TrainSchedule> schedules;
+        final List<Models.TrainSchedule> originalSchedules;
+
+        List<String> filters = new ArrayList<>();
 
         SearchListAdapter(List<Models.TrainSchedule> s) {
-            this.schedules = s;
+            this.originalSchedules = s;
+            this.schedules = new ArrayList<>(originalSchedules);
         }
 
         @NonNull
@@ -176,6 +198,29 @@ public class StartArrivalActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return schedules.size();
+        }
+
+        public void addFilter(String s) {
+            filters.add(s);
+            this.notifyDataSetChanged();
+        }
+
+        public void removeFilter(String s) {
+            filters.remove(s);
+            this.notifyDataSetChanged();
+        }
+
+        public void setFilters(List<String> newFilters) {
+            filters.clear();
+            filters.addAll(newFilters);
+
+            schedules.clear();
+            for(Models.TrainSchedule schedule: originalSchedules) {
+                if (filters.contains(schedule.getTrainType())) {
+                    schedules.add(schedule);
+                }
+            }
+            this.notifyDataSetChanged();
         }
     }
 
