@@ -200,7 +200,7 @@ public class CalendarManager {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Map<String, Map<String, String>> out = (Map<String, Map<String, String>>) dataSnapshot.getValue();
-                listener.onScheduleChanged(out);
+                listener.onScheduleChanged(out == null ? new HashMap<String, Map<String, String>>() : out);
             }
 
             @Override
