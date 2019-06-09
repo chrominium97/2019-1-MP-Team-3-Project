@@ -1,7 +1,9 @@
 package edu.skku.map.class42.team6;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -12,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -20,45 +23,56 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
 
-    EditText editTextEmail;
-    EditText editTextPassword;
-    Button buttonSingin;
-    Button textviewSignin;
-    TextView textviewMessage;
-    TextView textviewFindPassword;
-    ProgressDialog progressDialog;
-    FirebaseAuth firebaseAuth;
+    private EditText editTextEmail;
+    private EditText editTextPassword;
+    private Button buttonSingin;
+    private Button textviewSignin;
+    private TextView textviewMessage;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        firebaseAuth = FirebaseAuth.getInstance();
-
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
-        textviewSignin = findViewById(R.id.textViewSignin);
-        textviewMessage = findViewById(R.id.textviewMessage);
-        buttonSingin = findViewById(R.id.buttonSignup);
+        textviewSignin = findViewById(R.id.textview_login_instead);
+        textviewMessage = findViewById(R.id.textview_message);
+        buttonSingin = findViewById(R.id.button_create_account);
         progressDialog = new ProgressDialog(this);
 
+        ActivityCompat.requestPermissions(LoginActivity.this,
+                new String[]{Manifest.permission.WRITE_CALENDAR, Manifest.permission.READ_CALENDAR},
+                0);
+    }
 
-        buttonSingin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                userLogin();
-            }
-        });
-        textviewSignin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (permissions.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 finish();
-                startActivity(new Intent(getApplicationContext(), FirstActivity.class));
             }
-        });
 
-
+            buttonSingin.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    userLogin();
+                }
+            });
+            textviewSignin.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                    startActivity(new Intent(getApplicationContext(), JoinActivity.class));
+                }
+            });
+        } else {
+            Toast.makeText(this, "This application needs access to the calendar", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void userLogin() {
@@ -76,8 +90,7 @@ public class LoginActivity extends AppCompatActivity {
 
         progressDialog.setMessage("로그인 중입니다...");
         progressDialog.show();
-
-        firebaseAuth.signInWithEmailAndPassword(email, password)
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {

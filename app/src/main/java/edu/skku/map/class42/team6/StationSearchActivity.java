@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,12 +39,16 @@ public class StationSearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_station_search);
 
+        setTitle(R.string.title_activity_station_search);
+
         Intent intent = getIntent();
         TextInputLayout layout = findViewById(R.id.layout);
         final TextInputEditText editText = layout.findViewById(R.id.field);
 
         layout.setHint(intent.getStringExtra("hint"));
-        editText.setText(intent.getStringExtra("text"));
+        String text = intent.getStringExtra("text");
+        editText.setText(text);
+        results.setFilter(text);
 
         // Init list
         stationList = findViewById(R.id.list);
@@ -96,7 +101,11 @@ public class StationSearchActivity extends AppCompatActivity {
         StationFetcher.getInstance().request(new StationFetcher.OnStationListFetchedListener() {
             @Override
             public void onStationFetched(StationListResult result) {
-                results.putNewResult(result.stations);
+                if (result.succeeded) {
+                    results.putNewResult(result.stations);
+                } else {
+                    Toast.makeText(StationSearchActivity.this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                }
             }
 
             @NonNull
@@ -115,7 +124,6 @@ public class StationSearchActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 Intent i = new Intent();
-//                i.putExtra("station", Station.SUWON);
                 setResult(RESULT_CANCELED, i);
                 finish();
                 return false;
@@ -138,7 +146,7 @@ public class StationSearchActivity extends AppCompatActivity {
         ArrayList<String> originalIndex;
         ArrayList<String> stationIndex;
 
-        String filter = "";
+        String filter;
 
         RecyclerView.Adapter adapter;
 
@@ -154,8 +162,7 @@ public class StationSearchActivity extends AppCompatActivity {
             Collections.sort(this.originalIndex, new Comparator<String>() {
                 @Override
                 public int compare(String o1, String o2) {
-                    int i = get(o1).getStationName().compareTo(get(o2).getStationName());
-                    return i;
+                    return get(o1).getStationName().compareTo(get(o2).getStationName());
                 }
             });
             this.stationIndex = new ArrayList<>(this.originalIndex);
@@ -212,7 +219,7 @@ public class StationSearchActivity extends AppCompatActivity {
     }
 
     class StationListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView textView;
+        public final TextView textView;
 
         public StationListViewHolder(View v) {
             super(v);

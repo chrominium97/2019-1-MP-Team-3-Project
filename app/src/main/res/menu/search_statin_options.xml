@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@android:id/closeButton"
-        android:icon="@android:drawable/ic_menu_close_clear_cancel"
+        android:icon="@drawable/ic_close_black_24dp"
         android:title="@android:string/cancel"
         app:showAsAction="always" />
 </menu>

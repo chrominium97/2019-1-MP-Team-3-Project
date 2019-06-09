@@ -59,7 +59,7 @@ class VehicleFetcher {
     }
 
     private void fetch() {
-        Map<Integer, Models.Vehicle> vehicleMap = fetchVehicle();
+        Map<String, Models.Vehicle> vehicleMap = fetchVehicle();
         int r1 = 0;
         while (r1 < 5 && (vehicleMap = fetchVehicle()) == null) {
             r1++;
@@ -67,12 +67,13 @@ class VehicleFetcher {
         result = new OnVehicleListFetchedListener.VehicleListResult(vehicleMap != null, vehicleMap);
     }
 
-    private HashMap<Integer, Models.Vehicle> fetchVehicle() {
-        HashMap<Integer, Models.Vehicle> vehicleHashMap = null;
+    private HashMap<String, Models.Vehicle> fetchVehicle() {
+        HashMap<String, Models.Vehicle> vehicleHashMap = null;
         try {
             HttpURLConnection conn = (HttpURLConnection) new URL(
                     new StringBuilder("http://openapi.tago.go.kr/openapi/service/TrainInfoService/getVhcleKndList")
                             .append("?ServiceKey=").append(Models.API_KEY)
+                            .append("&numOfRows=100&pageNo=1")
                             .toString()
             ).openConnection();
             conn.setRequestMethod("GET");
@@ -92,8 +93,7 @@ class VehicleFetcher {
             XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
 
             vehicleHashMap = new HashMap<>();
-            int vID = -1;
-            String vName = null;
+            String vName = null, vID = null;
 
             parser.setInput(new StringReader(builder.toString()));
             int parserEvent = parser.getEventType();
@@ -103,7 +103,7 @@ class VehicleFetcher {
                         String name = parser.getName();
                         switch (name) {
                             case "vehiclekndid":
-                                vID = Integer.valueOf(parser.nextText());
+                                vID = parser.nextText();
                                 break;
                             case "vehiclekndnm":
                                 vName = parser.nextText();
@@ -135,9 +135,9 @@ class VehicleFetcher {
 
         class VehicleListResult {
             final boolean succeeded;
-            final Map<Integer, Models.Vehicle> vehicles;
+            final Map<String, Models.Vehicle> vehicles;
 
-            VehicleListResult(boolean succeeded, Map<Integer, Models.Vehicle> vehicles) {
+            VehicleListResult(boolean succeeded, Map<String, Models.Vehicle> vehicles) {
                 this.succeeded = succeeded;
                 this.vehicles = vehicles;
             }

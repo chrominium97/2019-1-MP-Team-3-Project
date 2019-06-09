@@ -1,5 +1,6 @@
 package edu.skku.map.class42.team6;
 
+import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -86,6 +87,7 @@ class StationFetcher {
         result = new OnStationListFetchedListener.StationListResult(success, cityMap, stationMap);
     }
 
+    @SuppressLint("UseSparseArrays")
     private Map<Integer, Models.City> fetchCities() {
         HashMap<Integer, Models.City> cityHashMap = null;
         try {
@@ -93,6 +95,7 @@ class StationFetcher {
             HttpURLConnection conn = (HttpURLConnection) new URL(
                     new StringBuilder("http://openapi.tago.go.kr/openapi/service/TrainInfoService/getCtyCodeList")
                             .append("?ServiceKey=").append(Models.API_KEY)
+                            .append("&numOfRows=100&pageNo=1")
                             .toString()
             ).openConnection();
             conn.setRequestMethod("GET");
@@ -154,6 +157,7 @@ class StationFetcher {
             HttpURLConnection conn = (HttpURLConnection) new URL(
                     new StringBuilder("http://openapi.tago.go.kr/openapi/service/TrainInfoService/getCtyAcctoTrainSttnList")
                             .append("?ServiceKey=").append(Models.API_KEY)
+                            .append("&numOfRows=100&pageNo=1")
                             .append("&cityCode=").append(cityCode)
                             .toString()
             ).openConnection();

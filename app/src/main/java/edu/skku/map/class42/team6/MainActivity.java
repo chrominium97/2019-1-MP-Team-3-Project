@@ -2,7 +2,6 @@ package edu.skku.map.class42.team6;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
@@ -23,22 +22,22 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Map;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    public static final int REQUEST_DEP = 1;
-    public static final int REQUEST_ARR = 2;
-    Models.SearchOptions searchOptions;
-    TextInputEditText input_arrival;
-    TextInputEditText input_departure;
+    private static final int REQUEST_DEP = 1;
+    private static final int REQUEST_ARR = 2;
+    private Models.SearchOptions searchOptions;
+    private TextInputEditText input_arrival;
+    private TextInputEditText input_departure;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        searchOptions = new Models.SearchOptions(Calendar.getInstance(), Models.SearchOptions.SearchMode.BY_DEPARTURE);
+        searchOptions = new Models.SearchOptions(Calendar.getInstance());
 
         final TextView by = findViewById(R.id.tv_search_type);
 
@@ -100,21 +99,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        CalendarManager manager = new CalendarManager(new CalendarManager.ScheduleChangeListener() {
-            @Override
-            public void onScheduleChanged(Map<String, Map<String, String>> newSchedule) {
-
-            }
-
-            @NonNull
-            @Override
-            public Context getContext() {
-                return MainActivity.this;
-            }
-        });
+        CalendarManager manager = new CalendarManager(MainActivity.this);
         manager.deleteCalendar();
         manager.initCalendar();
-        manager.refreshSchedules();
     }
 
     public void selectDate(View v) {
@@ -139,14 +126,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show();
     }
 
-    void refreshOptions() {
+    private void refreshOptions() {
         TextView date = findViewById(R.id.date);
         TextView time = findViewById(R.id.time);
         TextView mode = findViewById(R.id.tv_search_type);
         TabLayout tabs = findViewById(R.id.by_option);
 
         date.setText(SimpleDateFormat.getDateInstance().format(searchOptions.getDateTime().getTime()));
-        time.setText((new SimpleDateFormat("HH:mm")).format(searchOptions.getDateTime().getTime()));
+        time.setText((new SimpleDateFormat("HH:mm", Locale.KOREA)).format(searchOptions.getDateTime().getTime()));
         mode.setText(tabs.getSelectedTabPosition() == 0 ? getString(R.string.from) : getString(R.string.until));
     }
 
@@ -200,6 +187,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(intent);
         } else {
             Toast.makeText(this, "Some required fields are not filled!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    class a {
+        int a() {
+            return 1;
+        }
+    }
+
+    class b extends a {
+        @Override
+        int a() {
+            return 2;
         }
     }
 }

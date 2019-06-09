@@ -1,7 +1,7 @@
 <resources>
     <string name="train_search">Train Search</string>
 
-    <string name="app_name">Team 3</string>
+    <string name="app_name">Team 6</string>
     <string name="by_depart">By Departure</string>
     <string name="by_arrival">By Arrival</string>
 
@@ -10,5 +10,16 @@
 
     <string name="origin">Origin Station</string>
     <string name="destination">Destination Station</string>
-    <string name="title_activity_station_search">StationSearchActivity</string>
+    <string name="title_activity_station_search">Search stations</string>
+
+    <string name="create_account">Create Account</string>
+    <string name="create_account_info">You need an ID to use this application. Please use an E-mail to log in.</string>
+    <string name="login_email">Enter E-mail</string>
+    <string name="login_password">Enter password</string>
+    <string name="create_account_message_already_exists">This account already exists!</string>
+    <string name="create_account_login_instead">Click here to log in if you\'ve already joined</string>
+
+    <string name="network_error">Failed to connect. Check your internet connection.</string>
+
+    <string name="login">Log in</string>
 </resources>

@@ -18,22 +18,22 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class FirstActivity extends AppCompatActivity implements View.OnClickListener {
+public class JoinActivity extends AppCompatActivity implements View.OnClickListener {
 
     //define view objects
-    EditText editTextEmail;
-    EditText editTextPassword;
-    Button buttonSignup;
-    TextView textviewSingin;
-    TextView textviewMessage;
-    ProgressDialog progressDialog;
+    private EditText editTextEmail;
+    private EditText editTextPassword;
+    private Button buttonSignup;
+    private TextView textviewSingin;
+    private TextView textviewMessage;
+    private ProgressDialog progressDialog;
     //define firebase object
-    FirebaseAuth firebaseAuth;
+    private FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_first_actiity);
+        setContentView(R.layout.activity_join);
 
         firebaseAuth = FirebaseAuth.getInstance();
 
@@ -46,9 +46,9 @@ public class FirstActivity extends AppCompatActivity implements View.OnClickList
         //initializing views
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
-        textviewSingin = findViewById(R.id.textViewSignin);
-        textviewMessage = findViewById(R.id.textviewMessage);
-        buttonSignup = findViewById(R.id.buttonSignup);
+        textviewSingin = findViewById(R.id.textview_login_instead);
+        textviewMessage = findViewById(R.id.textview_message);
+        buttonSignup = findViewById(R.id.button_create_account);
         progressDialog = new ProgressDialog(this);
 
         //button click event
@@ -86,8 +86,8 @@ public class FirstActivity extends AppCompatActivity implements View.OnClickList
                             startActivity(new Intent(getApplicationContext(), MainActivity.class));
                         } else {
                             //에러발생시
-                            textviewMessage.setText("Already Exist!");
-                            Toast.makeText(FirstActivity.this, "등록 에러!", Toast.LENGTH_SHORT).show();
+                            textviewMessage.setText(getString(R.string.create_account_message_already_exists));
+                            Toast.makeText(JoinActivity.this, "등록 에러!", Toast.LENGTH_SHORT).show();
                         }
                         progressDialog.dismiss();
                     }

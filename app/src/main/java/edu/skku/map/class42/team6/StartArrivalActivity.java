@@ -1,6 +1,5 @@
 package edu.skku.map.class42.team6;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -9,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,22 +28,26 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 public class StartArrivalActivity extends AppCompatActivity {
 
-    CalendarManager manager;
+    private CalendarManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        manager = new CalendarManager(this);
+        final Models.SearchOptions options = (Models.SearchOptions) getIntent().getSerializableExtra("options");
+        manager = new CalendarManager(StartArrivalActivity.this);
 
         setContentView(R.layout.activity_start_arrival);
 
-        final Models.SearchOptions options = (Models.SearchOptions) getIntent().getSerializableExtra("options");
+        setTitle(options.getOrigin().getStationName() + "→" + options.getDestination().getStationName());
+
 
         final RecyclerView list = findViewById(R.id.listview);
         list.setLayoutManager(new LinearLayoutManager(this));
@@ -51,60 +55,87 @@ public class StartArrivalActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-
+                final List<Models.TrainSchedule> data = getXmlData(options);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        final List<Models.TrainSchedule> data = getXmlData(options);
-                        list.setAdapter(new SearchListAdapter(data));
-                        new CalendarManager(new CalendarManager.ScheduleChangeListener() {
+                        if (data == null) {
+                            Toast.makeText(StartArrivalActivity.this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                        }
+                        final RecyclerView.Adapter adapter = data == null
+                                ? new SearchListAdapter(new ArrayList<Models.TrainSchedule>(), options)
+                                : new SearchListAdapter(data, options);
+                        list.setAdapter(adapter);
+                        manager.refreshSchedulesOnce(new CalendarManager.ScheduleChangeListener() {
                             @Override
                             public void onScheduleChanged(Map<String, Map<String, String>> newSchedule) {
 
-                            }
+                                manager.refreshSchedules(new CalendarManager.ScheduleChangeListener() {
+                                    @Override
+                                    public void onScheduleChanged(Map<String, Map<String, String>> newSchedule) {
+                                        manager.initCalendar();
+                                        manager.clearCalendar();
+                                        List<Models.TrainSchedule> schedules = new ArrayList<>();
+                                        for (String s : newSchedule.keySet()) {
+                                            Map<String, String> k = newSchedule.get(s);
+                                            Models.TrainSchedule schedule = new Models.TrainSchedule(
+                                                    s,
+                                                    k.get("arrTime"),
+                                                    k.get("type"),
+                                                    k.get("dep"),
+                                                    k.get("arr")
+                                            );
+                                            schedules.add(schedule);
+                                            manager.insertScheduleToCalendar(schedule);
+                                        }
+                                        ((SearchListAdapter) adapter).setButtonFilters(schedules);
+                                    }
+                                });
 
-                            @NonNull
-                            @Override
-                            public Context getContext() {
-                                return StartArrivalActivity.this;
+                                VehicleFetcher.getInstance().request(new VehicleFetcher.OnVehicleListFetchedListener() {
+                                    @Override
+                                    public void onVehicleFetched(VehicleListResult result) {
+                                        ChipGroup group = findViewById(R.id.chip_group);
+                                        List<Models.Vehicle> vehicleList = new ArrayList<>(result.vehicles.values());
+                                        Collections.sort(vehicleList, new Comparator<Models.Vehicle>() {
+                                            @Override
+                                            public int compare(Models.Vehicle o1, Models.Vehicle o2) {
+                                                return o1.getVehicleName().compareTo(o2.getVehicleName());
+                                            }
+                                        });
+                                        for (Models.Vehicle vehicle : vehicleList) {
+                                            Chip chip = (Chip) getLayoutInflater().inflate(R.layout.chip, group, false);
+                                            chip.setText(vehicle.getVehicleName());
+                                            chip.setChecked(true);
+                                            chip.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                                @Override
+                                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                                    if (isChecked) {
+                                                        ((SearchListAdapter) adapter).removeFilter(buttonView.getText().toString());
+                                                    } else {
+                                                        ((SearchListAdapter) adapter).addFilter(buttonView.getText().toString());
+                                                    }
+                                                }
+                                            });
+                                            group.addView(chip);
+                                        }
+                                    }
+
+                                    @NonNull
+                                    @Override
+                                    public Looper getMainLooper() {
+                                        return StartArrivalActivity.this.getMainLooper();
+                                    }
+                                });
                             }
                         });
                     }
                 });
             }
         }).start();
-
-        VehicleFetcher.getInstance().request(new VehicleFetcher.OnVehicleListFetchedListener() {
-            @Override
-            public void onVehicleFetched(VehicleListResult result) {
-                ChipGroup group = findViewById(R.id.chip_group);
-                for (Models.Vehicle vehicle : result.vehicles.values()) {
-                    Chip chip = (Chip) getLayoutInflater().inflate(R.layout.chip, group, false);
-                    chip.setText(vehicle.getVehicleName());
-                    chip.setChecked(true);
-                    chip.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            if (isChecked) {
-                                ((SearchListAdapter) list.getAdapter()).addFilter(buttonView.getText().toString());
-                            } else {
-                                ((SearchListAdapter) list.getAdapter()).removeFilter(buttonView.getText().toString());
-                            }
-                        }
-                    });
-                    group.addView(chip);
-                }
-            }
-
-            @NonNull
-            @Override
-            public Looper getMainLooper() {
-                return StartArrivalActivity.this.getMainLooper();
-            }
-        });
     }
 
-    List<Models.TrainSchedule> getXmlData(Models.SearchOptions options) {
+    private List<Models.TrainSchedule> getXmlData(Models.SearchOptions options) {
 
         ArrayList<Models.TrainSchedule> out = new ArrayList<>();
         try {
@@ -125,6 +156,7 @@ public class StartArrivalActivity extends AppCompatActivity {
             while ((buffer = reader.readLine()) != null) {
                 builder.append(buffer);
             }
+
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             XmlPullParser xpp = factory.newPullParser();
             xpp.setInput(new StringReader(builder.toString()));
@@ -172,21 +204,51 @@ public class StartArrivalActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             e.printStackTrace();
+            out = null;
             // result.setText("Error!");
         }
         //buffer.append("파싱 끝!");
         return out;
     }
 
+    @SuppressWarnings("WeakerAccess")
     class SearchListAdapter extends RecyclerView.Adapter<SearchListViewHolder> {
 
         final List<Models.TrainSchedule> schedules;
         final List<Models.TrainSchedule> originalSchedules;
+        final Models.SearchOptions options;
+        final List<String> filters = new ArrayList<>();
+        List<Models.TrainSchedule> alreadyAddedSchedules = new ArrayList<>();
 
-        List<String> filters = new ArrayList<>();
-
-        SearchListAdapter(List<Models.TrainSchedule> s) {
-            this.originalSchedules = s;
+        SearchListAdapter(final List<Models.TrainSchedule> s, Models.SearchOptions displayOptions) {
+            this.originalSchedules = new ArrayList<>();
+            this.options = displayOptions;
+            String date = new SimpleDateFormat("yyyyMMddHHmmss").format(displayOptions.getDateTime().getTime());
+            if (options.getMode() == Models.SearchOptions.SearchMode.BY_ARRIVAL) {
+                for (Models.TrainSchedule schedule : s) {
+                    if (schedule.getArrivalTime().compareTo(date) <= 0) {
+                        originalSchedules.add(schedule);
+                    }
+                }
+                Collections.sort(originalSchedules, new Comparator<Models.TrainSchedule>() {
+                    @Override
+                    public int compare(Models.TrainSchedule o1, Models.TrainSchedule o2) {
+                        return o2.getDepartureTime().compareTo(o1.getDepartureTime());
+                    }
+                });
+            } else {
+                for (Models.TrainSchedule schedule : s) {
+                    if (schedule.getDepartureTime().compareTo(date) >= 0) {
+                        originalSchedules.add(schedule);
+                    }
+                }
+                Collections.sort(originalSchedules, new Comparator<Models.TrainSchedule>() {
+                    @Override
+                    public int compare(Models.TrainSchedule o1, Models.TrainSchedule o2) {
+                        return o1.getArrivalTime().compareTo(o2.getArrivalTime());
+                    }
+                });
+            }
             this.schedules = new ArrayList<>(originalSchedules);
         }
 
@@ -202,7 +264,9 @@ public class StartArrivalActivity extends AppCompatActivity {
             Models.TrainSchedule schedule = schedules.get(position);
             holder.trainType.setText(schedule.getTrainType());
             holder.trainTime.setText(schedule.getDepartureTime().substring(8, 12) + " ~ " + schedule.getArrivalTime().substring(8, 12));
-            holder.schedule = schedules.get(position);
+            holder.schedule = schedule;
+            holder.isAdded = alreadyAddedSchedules.contains(schedule);
+            holder.button.setText(holder.isAdded ? "Added" : "Add");
         }
 
         @Override
@@ -210,23 +274,31 @@ public class StartArrivalActivity extends AppCompatActivity {
             return schedules.size();
         }
 
+        public void setButtonFilters(List<Models.TrainSchedule> newSchedule) {
+            this.alreadyAddedSchedules = newSchedule;
+            notifyDataSetChanged();
+        }
+
         public void addFilter(String s) {
             filters.add(s);
-            this.notifyDataSetChanged();
+            applyFilter();
         }
 
         public void removeFilter(String s) {
             filters.remove(s);
-            this.notifyDataSetChanged();
+            applyFilter();
         }
 
         public void setFilters(List<String> newFilters) {
             filters.clear();
             filters.addAll(newFilters);
+            applyFilter();
+        }
 
+        private void applyFilter() {
             schedules.clear();
             for (Models.TrainSchedule schedule : originalSchedules) {
-                if (filters.contains(schedule.getTrainType())) {
+                if (!filters.contains(schedule.getTrainType())) {
                     schedules.add(schedule);
                 }
             }
@@ -235,9 +307,11 @@ public class StartArrivalActivity extends AppCompatActivity {
     }
 
     class SearchListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView trainType;
-        public TextView trainTime;
-        public Button button;
+        public final TextView trainType;
+        public final TextView trainTime;
+        public final Button button;
+
+        public boolean isAdded = false;
 
         public Models.TrainSchedule schedule;
 
@@ -252,10 +326,10 @@ public class StartArrivalActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-            if (v.isEnabled()) {
-                manager.addSchedule(schedule);
-            } else {
+            if (isAdded) {
                 manager.removeSchedule(schedule);
+            } else {
+                manager.insertSchedule(schedule);
             }
         }
     }
