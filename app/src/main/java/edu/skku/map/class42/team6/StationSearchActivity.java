@@ -1,6 +1,7 @@
 package edu.skku.map.class42.team6;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Looper;
 import android.text.Editable;
@@ -52,7 +53,11 @@ public class StationSearchActivity extends AppCompatActivity {
 
         // Init list
         stationList = findViewById(R.id.list);
-        RecyclerView.LayoutManager manager = new GridLayoutManager(this, 2);
+        RecyclerView.LayoutManager manager
+                = new GridLayoutManager(
+                this,
+                getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 4 : 2
+        );
         RecyclerView.Adapter adapter = new RecyclerView.Adapter<StationListViewHolder>() {
             @NonNull
             @Override
